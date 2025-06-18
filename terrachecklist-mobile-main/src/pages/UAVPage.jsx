@@ -23,24 +23,59 @@ const UAVPage = ({ navigation }) => {
 
 
   // Function to load saved data from AsyncStorage
-  const loadSavedData = async () => {
-    try {
-      const savedCheckedItems = await AsyncStorage.getItem('UAVcheckedItems');
-      const savedItemNotes = await AsyncStorage.getItem('UAVitemNotes');
-      const savedNotesInput = await AsyncStorage.getItem('UAVnotesInput');
-      const savedEvidenceFile = await AsyncStorage.getItem('UAVevidenceFile');
+  // const loadSavedData = async () => {
+  //   try {
+  //     const savedCheckedItems = await AsyncStorage.getItem('UAVcheckedItems');
+  //     const savedItemNotes = await AsyncStorage.getItem('UAVitemNotes');
+  //     const savedNotesInput = await AsyncStorage.getItem('UAVnotesInput');
+  //     const savedEvidenceFile = await AsyncStorage.getItem('UAVevidenceFile');
 
-      if (savedCheckedItems) setUAVCheckedItems(JSON.parse(savedCheckedItems));
-      if (savedItemNotes) setUAVItemNotes(JSON.parse(savedItemNotes));
-      if (savedNotesInput) setUAVNotesInput(savedNotesInput);
-      if (savedEvidenceFile) setUAVEvidenceFile(JSON.parse(savedEvidenceFile));
-      setDataLoaded(true);
-    } catch (error) {
-      console.error("Error loading saved data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     if (savedCheckedItems) setUAVCheckedItems(JSON.parse(savedCheckedItems));
+  //     if (savedItemNotes) setUAVItemNotes(JSON.parse(savedItemNotes));
+  //     if (savedNotesInput) setUAVNotesInput(savedNotesInput);
+  //     if (savedEvidenceFile) setUAVEvidenceFile(JSON.parse(savedEvidenceFile));
+  //     setDataLoaded(true);
+  //   } catch (error) {
+  //     console.error("Error loading saved data:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const loadSavedData = async () => {
+  try {
+    const [savedCheckedItems, savedItemNotes, savedNotesInput, savedEvidenceFile] = 
+      await Promise.all([
+        AsyncStorage.getItem('UAVcheckedItems'),
+        AsyncStorage.getItem('UAVitemNotes'),
+        AsyncStorage.getItem('UAVnotesInput'),
+        AsyncStorage.getItem('UAVevidenceFile')
+      ]);
+
+    // Initialize with empty objects if null
+    setUAVCheckedItems(JSON.parse(savedCheckedItems || '{}'));
+    setUAVItemNotes(JSON.parse(savedItemNotes || '{}'));
+    setUAVNotesInput(savedNotesInput || '');
+    setUAVEvidenceFile(savedEvidenceFile ? JSON.parse(savedEvidenceFile) : null);
+    
+    setDataLoaded(true);
+  } catch (error) {
+    console.error("Error loading saved data:", error);
+    // Initialize empty states if loading fails
+    setUAVCheckedItems({});
+    setUAVItemNotes({});
+    setUAVNotesInput('');
+    setUAVEvidenceFile(null);
+    setDataLoaded(true);
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  console.log('Current UAVcheckedItems:', UAVcheckedItems);
+  console.log('Current UAVitemNotes:', UAVitemNotes);
+}, [UAVcheckedItems, UAVitemNotes]);
 
   // Load saved data when the page gains focus
   useFocusEffect(
@@ -117,8 +152,14 @@ const UAVPage = ({ navigation }) => {
   useEffect(() => {
     if (!dataLoaded) return; // Wait for AsyncStorage data to load
   
+    // const normalizeKey = (key) =>
+    //   key.toLowerCase().replace(/\s+/g, "_").replace(/-/g, "_");
     const normalizeKey = (key) =>
-      key.toLowerCase().replace(/\s+/g, "_").replace(/-/g, "_");
+  key
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
   
     const fetchChecklistData = async () => {
       try {
@@ -158,26 +199,46 @@ const UAVPage = ({ navigation }) => {
             }
           });
         });
-  
-        // Filter UAVcheckedItems to only rendered keys
+
         setUAVCheckedItems((prevState) => {
-          const filteredState = {};
-          expectedKeysSet.forEach((key) => {
-            filteredState[key] = prevState[key] ?? false;
-          });
-          return filteredState;
-        });
+  const newState = {...prevState};
+  expectedKeysSet.forEach((key) => {
+    if (newState[key] === undefined) {
+      newState[key] = false; // Initialize new items as unchecked
+    }
+  });
+  return newState;
+});
+
+setUAVItemNotes((prevState) => {
+  const newNotes = {...prevState};
+  expectedKeysSet.forEach((key) => {
+    if (newNotes[key] === undefined) {
+      newNotes[key] = ''; // Initialize new items with empty notes
+    }
+  });
+  return newNotes;
+});
   
-        // Filter UAVitemNotes to only rendered keys
-        setUAVItemNotes((prevState) => {
-          const filteredNotes = {};
-          expectedKeysSet.forEach((key) => {
-            if (prevState[key] !== undefined) {
-              filteredNotes[key] = prevState[key];
-            }
-          });
-          return filteredNotes;
-        });
+        // // Filter UAVcheckedItems to only rendered keys
+        // setUAVCheckedItems((prevState) => {
+        //   const filteredState = {};
+        //   expectedKeysSet.forEach((key) => {
+        //     filteredState[key] = prevState[key] ?? false;
+        //   });
+        //   return filteredState;
+        // });
+  
+        // // Filter UAVitemNotes to only rendered keys
+        // setUAVItemNotes((prevState) => {
+        //   const filteredNotes = {};
+        //   expectedKeysSet.forEach((key) => {
+        //     if (prevState[key] !== undefined) {
+        //       filteredNotes[key] = prevState[key];
+        //     }
+        //   });
+        //   return filteredNotes;
+        // });
       } catch (error) {
         console.error("Error fetching checklist data:", error);
       } finally {
@@ -188,13 +249,21 @@ const UAVPage = ({ navigation }) => {
     fetchChecklistData();
   }, [uavEquipment, dataLoaded]);
   
+  // const normalizeKey = (key) => {
+  //   return key
+  //     .toLowerCase()
+  //     .trim()
+  //     .replace(/[\s_]+/g, "_")  // replace any space or underscore group with one underscore
+  //     .replace(/^_+|_+$/g, ""); // trim leading/trailing underscores
+  // };  
+
   const normalizeKey = (key) => {
     return key
       .toLowerCase()
       .trim()
-      .replace(/[\s_]+/g, "_")  // replace any space or underscore group with one underscore
-      .replace(/^_+|_+$/g, ""); // trim leading/trailing underscores
-  };  
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+  };
 
   const toggleCheck = (itemKey) => {
     const normalizedKey = normalizeKey(itemKey);
@@ -256,6 +325,7 @@ const UAVPage = ({ navigation }) => {
   };
 
   const renderDynamicFields = (uav) => {
+     const equipmentName = normalizeKey(uav.equipment_uav);
     const sections = [
       { prefix: "uav_", title: "UAV" },
       { prefix: "power_system_", title: "Power System" },
@@ -263,52 +333,96 @@ const UAVPage = ({ navigation }) => {
       { prefix: "standard_acc_", title: "Standard Accessories" },
       { prefix: "charger_box_", title: "Charger Box" },
     ];
-  
+
     return sections.map((section, sectionIndex) => {
-      const fields = Object.keys(uav)
-        .filter((key) => key.startsWith(section.prefix) && uav[key] !== null)
-        .map((key) => uav[key])
-        .filter((item) => item !== "");
+    // Ambil semua key yang sesuai section dan ada isinya
+    const fields = Object.keys(uav)
+      .filter((key) => key.startsWith(section.prefix) && uav[key] !== null && uav[key] !== "")
+      .map((key) => uav[key]);
+
+    if (fields.length === 0) return null;
+
+    return (
+      <View key={sectionIndex} style={styles.section}>
+        <Text style={styles.sectionTitle}>{section.title}</Text>
+        {fields.map((item, index) => {
+          const itemNumber = index + 1;
+         // const normalizedKey = `${equipmentName}_${section.prefix}${itemNumber}`;
+         const normalizedKey = `${equipmentName}_${section.prefix.slice(0, -1)}_${itemNumber}`;
+          return (
+            <View key={normalizedKey} style={styles.itemContainer}>
+              <Text style={styles.itemText}>{item}</Text>
+              <TouchableOpacity
+                style={[
+                  styles.checkButton,
+                  UAVcheckedItems[normalizedKey] && styles.checkedButton,
+                ]}
+                onPress={() => toggleCheck(normalizedKey)}
+              >
+                {UAVcheckedItems[normalizedKey] && (
+                  <Ionicons name="checkmark" size={20} color="white" />
+                )}
+              </TouchableOpacity>
+              <TextInput
+                style={styles.input}
+                placeholder="add note..."
+                placeholderTextColor="#888"
+                value={UAVitemNotes[normalizedKey] || ""}
+                onChangeText={(text) => handleNoteChange(normalizedKey, text)}
+              />
+            </View>
+          );
+        })}
+      </View>
+    );
+  });
+};
   
-      if (fields.length === 0) return null;
+  //   return sections.map((section, sectionIndex) => {
+  //     const fields = Object.keys(uav)
+  //       .filter((key) => key.startsWith(section.prefix) && uav[key] !== null)
+  //       .map((key) => uav[key])
+  //       .filter((item) => item !== "");
   
-      let sectionCounter = 0; // Counter for each section
-      return (
-        <View key={sectionIndex} style={styles.section}>
-          <Text style={styles.sectionTitle}>{`${section.title}`}</Text>
-          {fields.map((item, index) => {
-            sectionCounter += 1; // Increment the counter for each item
-            const uniqueKey = `${uav.equipment_uav || "UAV"}_${section.prefix}_${sectionCounter}`;
-            const normalizedKey = normalizeKey(uniqueKey);
+  //     if (fields.length === 0) return null;
   
-            return (
-              <View key={index} style={styles.itemContainer}>
-                <Text style={styles.itemText}>{item}</Text>
-                <TouchableOpacity
-                  style={[
-                    styles.checkButton,
-                    UAVcheckedItems[normalizedKey] && styles.checkedButton,
-                  ]}
-                  onPress={() => toggleCheck(normalizedKey)}
-                >
-                  {UAVcheckedItems[normalizedKey] && (
-                    <Ionicons name="checkmark" size={20} color="white" />
-                  )}
-                </TouchableOpacity>
-                <TextInput
-                  style={styles.input}
-                  placeholder="add note..."
-                  placeholderTextColor="#888"
-                  value={UAVitemNotes[normalizedKey] || ""}
-                  onChangeText={(text) => handleNoteChange(normalizedKey, text)}
-                />
-              </View>
-            );
-          })}
-        </View>
-      );
-    });
-  };
+  //     let sectionCounter = 0; // Counter for each section
+  //     return (
+  //       <View key={sectionIndex} style={styles.section}>
+  //         <Text style={styles.sectionTitle}>{`${section.title}`}</Text>
+  //         {fields.map((item, index) => {
+  //           sectionCounter += 1; // Increment the counter for each item
+  //           const uniqueKey = `${uav.equipment_uav || "UAV"}_${section.prefix}_${sectionCounter}`;
+  //           const normalizedKey = normalizeKey(uniqueKey);
+  
+  //           return (
+  //             <View key={index} style={styles.itemContainer}>
+  //               <Text style={styles.itemText}>{item}</Text>
+  //               <TouchableOpacity
+  //                 style={[
+  //                   styles.checkButton,
+  //                   UAVcheckedItems[normalizedKey] && styles.checkedButton,
+  //                 ]}
+  //                 onPress={() => toggleCheck(normalizedKey)}
+  //               >
+  //                 {UAVcheckedItems[normalizedKey] && (
+  //                   <Ionicons name="checkmark" size={20} color="white" />
+  //                 )}
+  //               </TouchableOpacity>
+  //               <TextInput
+  //                 style={styles.input}
+  //                 placeholder="add note..."
+  //                 placeholderTextColor="#888"
+  //                 value={UAVitemNotes[normalizedKey] || ""}
+  //                 onChangeText={(text) => handleNoteChange(normalizedKey, text)}
+  //               />
+  //             </View>
+  //           );
+  //         })}
+  //       </View>
+  //     );
+  //   });
+  // };
 
   if (loading) {
     return (
@@ -334,7 +448,7 @@ const UAVPage = ({ navigation }) => {
           )}
         </View>
     
-        {checklistData && checklistData.length > 0 ? (
+        {/* {checklistData && checklistData.length > 0 ? (
           checklistData.map((uav, index) => (
             <View key={index} style={styles.card}>
               <Text style={styles.sectionTitleuav}>{`UAV - ${uav.equipment_uav}`}</Text>
@@ -345,7 +459,20 @@ const UAVPage = ({ navigation }) => {
           <View style={styles.section}>
             <Text style={styles.noDataText}>No checklist data found for this equipment.</Text>
           </View>
-        )}
+        )} */}
+
+        {checklistData && checklistData.length > 0 ? (
+  checklistData.map((uav, index) => (
+    <View key={index} style={styles.card}>
+      <Text style={styles.sectionTitleuav}>{`UAV - ${uav.equipment_uav}`}</Text>
+      {renderDynamicFields(uav)}
+    </View>
+  ))
+) : (
+  <View style={styles.section}>
+    <Text style={styles.noDataText}>No checklist data found for this equipment.</Text>
+  </View>
+)}
     
         
     
@@ -561,7 +688,7 @@ const styles = StyleSheet.create({
   noDataText: {
     textAlign: 'center',
     fontSize: 16,
-    color: '#888', // abu-abu netral
+    color: '#888', 
     paddingVertical: 20,
     paddingHorizontal: 10,
     fontStyle: 'italic',
