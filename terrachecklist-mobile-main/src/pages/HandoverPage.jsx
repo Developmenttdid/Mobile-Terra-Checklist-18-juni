@@ -101,17 +101,29 @@ const HandoverPage = ({ navigation }) => {
     try {
       const savedEmail = await AsyncStorage.getItem("userEmail");
       const savedPicValue = await AsyncStorage.getItem("handoverPIC");
-      const savedhandoverNotesInput = await AsyncStorage.getItem("handoverNotesInput");
-      const savedOutChecked = await AsyncStorage.getItem("handoveroutCheckedItems");
-      const savedInChecked = await AsyncStorage.getItem("handoverinCheckedItems");
-      const savedEvidenceFiles = await AsyncStorage.getItem("handoverEvidenceFiles");
+      const savedhandoverNotesInput = await AsyncStorage.getItem(
+        "handoverNotesInput"
+      );
+      const savedOutChecked = await AsyncStorage.getItem(
+        "handoveroutCheckedItems"
+      );
+      const savedInChecked = await AsyncStorage.getItem(
+        "handoverinCheckedItems"
+      );
+      const savedEvidenceFiles = await AsyncStorage.getItem(
+        "handoverEvidenceFiles"
+      );
 
       if (savedPicValue !== null) setPicValue(JSON.parse(savedPicValue));
-      if (savedhandoverNotesInput !== null) setHandoverNotesInput(JSON.parse(savedhandoverNotesInput));
+      if (savedhandoverNotesInput !== null)
+        setHandoverNotesInput(JSON.parse(savedhandoverNotesInput));
       if (savedEmail) setEmail(savedEmail);
-      if (savedOutChecked !== null) setEquipmentOutChecked(JSON.parse(savedOutChecked));
-      if (savedInChecked !== null) setEquipmentInChecked(JSON.parse(savedInChecked));
-      if (savedEvidenceFiles) setHandoverEvidenceFiles(JSON.parse(savedEvidenceFiles));
+      if (savedOutChecked !== null)
+        setEquipmentOutChecked(JSON.parse(savedOutChecked));
+      if (savedInChecked !== null)
+        setEquipmentInChecked(JSON.parse(savedInChecked));
+      if (savedEvidenceFiles)
+        setHandoverEvidenceFiles(JSON.parse(savedEvidenceFiles));
     } catch (error) {
       console.log("Error loading saved data:", error);
     }
@@ -126,17 +138,35 @@ const HandoverPage = ({ navigation }) => {
   useEffect(() => {
     const saveData = async () => {
       try {
-        await AsyncStorage.setItem("handoveroutCheckedItems", JSON.stringify(equipmentOutChecked));
-        await AsyncStorage.setItem("handoverinCheckedItems", JSON.stringify(equipmentInChecked));
+        await AsyncStorage.setItem(
+          "handoveroutCheckedItems",
+          JSON.stringify(equipmentOutChecked)
+        );
+        await AsyncStorage.setItem(
+          "handoverinCheckedItems",
+          JSON.stringify(equipmentInChecked)
+        );
         await AsyncStorage.setItem("handoverPIC", JSON.stringify(picValue));
-        await AsyncStorage.setItem("handoverNotesInput", JSON.stringify(handoverNotesInput));
-        await AsyncStorage.setItem("handoverEvidenceFiles", JSON.stringify(handoverEvidenceFiles));
+        await AsyncStorage.setItem(
+          "handoverNotesInput",
+          JSON.stringify(handoverNotesInput)
+        );
+        await AsyncStorage.setItem(
+          "handoverEvidenceFiles",
+          JSON.stringify(handoverEvidenceFiles)
+        );
       } catch (error) {
         console.log("Error saving data:", error);
       }
     };
     saveData();
-  }, [equipmentOutChecked, equipmentInChecked, picValue, handoverNotesInput, handoverEvidenceFiles]);
+  }, [
+    equipmentOutChecked,
+    equipmentInChecked,
+    picValue,
+    handoverNotesInput,
+    handoverEvidenceFiles,
+  ]);
 
   // Evidence Handler
   const uploadEvidenceFiles = async () => {
@@ -144,29 +174,32 @@ const HandoverPage = ({ navigation }) => {
     const uploadedFiles = [];
     try {
       for (const file of handoverEvidenceFiles) {
-        if (file.uri && file.uri.startsWith('http')) {
+        if (file.uri && file.uri.startsWith("http")) {
           uploadedFiles.push(file.uri);
           continue;
         }
         const formData = new FormData();
-        formData.append('evidence', {
+        formData.append("evidence", {
           uri: file.uri,
           name: `evidence_${Date.now()}.jpg`,
-          type: 'image/jpeg'
+          type: "image/jpeg",
         });
-        const response = await fetch('http://103.163.184.111:3000/handover_upload', {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+        const response = await fetch(
+          "http://103.163.184.111:3000/handover_upload",
+          {
+            method: "POST",
+            body: formData,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
         const result = await response.json();
         uploadedFiles.push(result.evidence);
       }
       return uploadedFiles;
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error("Upload error:", error);
       throw error;
     } finally {
       setIsUploading(false);
@@ -176,7 +209,10 @@ const HandoverPage = ({ navigation }) => {
   const handleSelectFromGallery = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Permission Required", "Please grant gallery permission to select photos");
+      Alert.alert(
+        "Permission Required",
+        "Please grant gallery permission to select photos"
+      );
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -185,14 +221,17 @@ const HandoverPage = ({ navigation }) => {
       quality: 1,
     });
     if (!result.canceled && result.assets) {
-      setHandoverEvidenceFiles(prev => [...prev, ...result.assets]);
+      setHandoverEvidenceFiles((prev) => [...prev, ...result.assets]);
     }
   };
 
   const handleSelectFromCamera = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Permission Required", "Please grant camera permission to take photos");
+      Alert.alert(
+        "Permission Required",
+        "Please grant camera permission to take photos"
+      );
       return;
     }
     const result = await ImagePicker.launchCameraAsync({
@@ -200,7 +239,7 @@ const HandoverPage = ({ navigation }) => {
       allowsEditing: true,
     });
     if (!result.canceled && result.assets) {
-      setHandoverEvidenceFiles(prev => [...prev, result.assets[0]]);
+      setHandoverEvidenceFiles((prev) => [...prev, result.assets[0]]);
     }
   };
 
@@ -218,12 +257,12 @@ const HandoverPage = ({ navigation }) => {
   };
 
   const handleDeleteHandoverEvidence = (index) => {
-    setHandoverEvidenceFiles(prev => prev.filter((_, i) => i !== index));
+    setHandoverEvidenceFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const renderEvidenceItem = ({ item, index }) => (
     <View style={styles.evidenceItem}>
-      <TouchableOpacity 
+      <TouchableOpacity
         onPress={() => {
           setSelectedImage(item.uri);
           setModalVisible(true);
@@ -231,8 +270,8 @@ const HandoverPage = ({ navigation }) => {
       >
         <Image source={{ uri: item.uri }} style={styles.evidenceImage} />
       </TouchableOpacity>
-      <TouchableOpacity 
-        style={styles.deleteButton} 
+      <TouchableOpacity
+        style={styles.deleteButton}
         onPress={() => handleDeleteHandoverEvidence(index)}
       >
         <AntDesign name="delete" size={20} color="white" />
@@ -242,32 +281,125 @@ const HandoverPage = ({ navigation }) => {
 
   // ===================== SUBMIT FUNCTIONS =====================
 
-  // UAV Submit
+  //UAV Submit
+  // const handleSubmitUav = async () => {
+  //   try {
+  //     if (!projectCode || !email || !uavEquipment || uavEquipment.length === 0) {
+  //     //  alert("Missing project code, email, or no UAV equipment to submit.");
+  //       return;
+  //     }
+  //     const maxCounts = { uav: 20, power_system: 8, gcs: 4, standard_acc: 8 };
+  //     for (let i = 0; i < uavEquipment.length; i++) {
+  //       const uavName = uavEquipment[i];
+  //       const uavPrefix = uavName.toLowerCase().replace(/ /g, "_");
+  //       console.log("uavPrefix: ", uavPrefix);
+  //       const payload = {
+  //         project_code: projectCode,
+  //         email: email,
+  //         equipment_uav: uavName,
+  //         notes: UAVnotesInput || null,
+  //       };
+  //       Object.entries(maxCounts).forEach(([section, maxCount]) => {
+  //         for (let j = 1; j <= maxCount; j++) {
+  //           const fullKey = `${uavPrefix}_${section}_${j}`;
+  //           const payloadKey = `${section}_${j}`;
+  //           const noteKey = `${payloadKey}_notes`;
+  //           payload[payloadKey] = UAVcheckedItems[fullKey] ?? null;
+  //           payload[noteKey] = UAVitemNotes[fullKey] ?? null;
+  //         }
+  //       });
+  //       console.log("submit payload: ", payload);
+  //       const response = await fetch(
+  //         "http://103.163.184.111:3000/uav_database",
+  //         {
+  //           method: "POST",
+  //           headers: { "Content-Type": "application/json" },
+  //           body: JSON.stringify(payload),
+  //         }
+  //       );
+  //       const data = await response.json();
+  //       if (!response.ok) {
+  //         console.error(`❌ Failed to submit UAV ${uavName}:`, data);
+  //         alert(`Failed to submit ${uavName}: ` + data.message);
+  //         return;
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("❌ Error submitting UAV data:", error);
+  //     alert("Error submitting UAV data");
+  //   }
+  // };
+
   const handleSubmitUav = async () => {
     try {
-      if (!projectCode || !email || !uavEquipment || uavEquipment.length === 0) {
-      //  alert("Missing project code, email, or no UAV equipment to submit.");
+      if (
+        !projectCode ||
+        !email ||
+        !uavEquipment ||
+        uavEquipment.length === 0
+      ) {
         return;
       }
-      const maxCounts = { uav: 20, power_system: 8, gcs: 4, standard_acc: 8 };
+      let checklistData = [];
+      try {
+        const res = await fetch(
+          "http://103.163.184.111:3000/inventory_checklist"
+        );
+        checklistData = await res.json();
+      } catch (err) {
+        console.error("Failed to fetch checklistData:", err);
+        return;
+      }
+
       for (let i = 0; i < uavEquipment.length; i++) {
         const uavName = uavEquipment[i];
-        const uavPrefix = uavName.toLowerCase().replace(/ /g, "_");
+        const normalizeKey = (key) =>
+          key
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9]+/g, "_")
+            .replace(/^_+|_+$/g, "");
+        const normalizedUavName = normalizeKey(uavName);
+        const uavData = checklistData.find(
+          (item) => normalizeKey(item.equipment_uav) === normalizedUavName
+        );
+
+        if (!uavData) continue;
+
         const payload = {
           project_code: projectCode,
           email: email,
           equipment_uav: uavName,
           notes: UAVnotesInput || null,
         };
-        Object.entries(maxCounts).forEach(([section, maxCount]) => {
-          for (let j = 1; j <= maxCount; j++) {
-            const fullKey = `${uavPrefix}_${section}_${j}`;
-            const payloadKey = `${section}_${j}`;
-            const noteKey = `${payloadKey}_notes`;
-            payload[payloadKey] = UAVcheckedItems[fullKey] ?? null;
-            payload[noteKey] = UAVitemNotes[fullKey] ?? null;
-          }
+        const sections = [
+          { prefix: "uav_", name: "uav" },
+          { prefix: "power_system_", name: "power_system" },
+          { prefix: "gcs_", name: "gcs" },
+          { prefix: "standard_acc_", name: "standard_acc" },
+          { prefix: "charger_box_", name: "charger_box" },
+        ];
+
+        sections.forEach((section) => {
+          const fields = Object.keys(uavData).filter(
+            (key) => key.startsWith(section.prefix) && uavData[key]
+          );
+
+          fields.forEach((_, index) => {
+            const itemNumber = index + 1;
+
+            const payloadCheckKey = `${section.name}_${itemNumber}`;
+            const payloadNoteKey = `${payloadCheckKey}_notes`;
+            const stateKey = `${normalizedUavName}_${section.name}_${itemNumber}`;
+
+            payload[payloadCheckKey] = String(
+              UAVcheckedItems[stateKey] ?? false
+            );
+            payload[payloadNoteKey] = UAVitemNotes[stateKey] ?? null;
+          });
         });
+
+        console.log("submit payload: ", payload);
         const response = await fetch(
           "http://103.163.184.111:3000/uav_database",
           {
@@ -294,7 +426,12 @@ const HandoverPage = ({ navigation }) => {
     try {
       const savedGpsItems = await AsyncStorage.getItem("gpsCheckedItems");
       const gpsCheckedItems = savedGpsItems ? JSON.parse(savedGpsItems) : {};
-      if (!projectCode || !email || !gpsEquipment || gpsEquipment.length === 0) {
+      if (
+        !projectCode ||
+        !email ||
+        !gpsEquipment ||
+        gpsEquipment.length === 0
+      ) {
         //alert("Missing project code, email, or no GPS equipment to submit");
         return;
       }
@@ -356,7 +493,12 @@ const HandoverPage = ({ navigation }) => {
   // Payload Submit
   const handleSubmitPayload = async () => {
     try {
-      if (!projectCode || !email || !payloadEquipment || payloadEquipment.length === 0) {
+      if (
+        !projectCode ||
+        !email ||
+        !payloadEquipment ||
+        payloadEquipment.length === 0
+      ) {
         //alert("Missing project code, email, or no payloads to submit");
         return;
       }
@@ -427,7 +569,9 @@ const HandoverPage = ({ navigation }) => {
       Object.entries(groupedEquipment).forEach(([cardTitle, items]) => {
         items.forEach((item) => {
           const equipmentId = item.id || "Unknown ID";
-          const key = `${cardTitle}_${equipmentId}`.toLowerCase().replace(/ /g, "_");
+          const key = `${cardTitle}_${equipmentId}`
+            .toLowerCase()
+            .replace(/ /g, "_");
           const isChecked = otherCheckedItems[key] ? "true" : "false";
           payload.push({
             project_code: projectCode,
@@ -475,10 +619,12 @@ const HandoverPage = ({ navigation }) => {
         alert(" PIC Project are required.");
         return;
       }
-      let evidenceUrls = handoverEvidenceFiles.map(file =>
-        file.uri && file.uri.startsWith('http') ? file.uri : null
-      ).filter(Boolean);
-      if (handoverEvidenceFiles.some(file => !file.uri.startsWith('http'))) {
+      let evidenceUrls = handoverEvidenceFiles
+        .map((file) =>
+          file.uri && file.uri.startsWith("http") ? file.uri : null
+        )
+        .filter(Boolean);
+      if (handoverEvidenceFiles.some((file) => !file.uri.startsWith("http"))) {
         evidenceUrls = await uploadEvidenceFiles();
       }
       const payload = {
@@ -489,7 +635,7 @@ const HandoverPage = ({ navigation }) => {
         equipment_out: equipmentOutChecked,
         equipment_in: equipmentInChecked,
         notes: handoverNotesInput || null,
-        evidence: evidenceUrls.join(','),
+        evidence: evidenceUrls.join(","),
       };
       console.log("Submitting handover payload:", payload);
       const response = await fetch(
@@ -503,8 +649,8 @@ const HandoverPage = ({ navigation }) => {
       const data = await response.json();
       if (response.ok) {
         console.log("✅ Handover data submitted successfully:", data);
-       // alert("✅ Handover data submitted successfully!");
-        setHandoverEvidenceFiles(evidenceUrls.map(uri => ({ uri })));
+        // alert("✅ Handover data submitted successfully!");
+        setHandoverEvidenceFiles(evidenceUrls.map((uri) => ({ uri })));
       } else {
         console.error("❌ Failed to submit handover data:", data);
         alert("Failed to submit handover data: " + data.message);
@@ -516,58 +662,58 @@ const HandoverPage = ({ navigation }) => {
   };
 
   const resetAllStates = () => {
-  // Reset all state variables
-  setEquipmentInChecked({});
-  setEquipmentOutChecked({});
-  setPicValue(null);
-  setHandoverNotesInput("");
-  setHandoverEvidenceFiles([]);
-  
-  // Reset UAV states
-  setUAVCheckedItems({});
-  setUAVItemNotes({});
-  setUAVNotesInput("");
-  
-  // Reset GPS states
-  setGpsCheckedItems({});
-  setGpsItemNotes({});
-  setGpsNotesInput("");
-  
-  // Reset Payload states
-  setPayloadCheckedItems({});
-  setPayloadItemNotes({});
-  setPayloadNotesInput("");
-  
-  // Reset Other Equipment states
-  setOtherCheckedItems({});
-  setOtherItemNotes({});
-  setOtherNotesInput("");
-  
-  // Clear AsyncStorage
-  AsyncStorage.multiRemove([
-    "handoveroutCheckedItems",
-    "handoverinCheckedItems",
-    "handoverPIC",
-    "handoverNotesInput",
-    "handoverEvidenceFiles",
-    "uavCheckedItems",
-    "uavItemNotes",
-    "uavNotesInput",
-    "gpsCheckedItems",
-    "gpsItemNotes",
-    "gpsNotesInput",
-    "payloadCheckedItems",
-    "payloadItemNotes",
-    "payloadNotesInput",
-    "otherCheckedItems",
-    "otherItemNotes",
-    "otherNotesInput"
-  ]).catch(error => {
-    console.log("Error clearing AsyncStorage:", error);
-  });
-  
-  console.log("✅ All states have been reset");
-};
+    // Reset all state variables
+    setEquipmentInChecked({});
+    setEquipmentOutChecked({});
+    setPicValue(null);
+    setHandoverNotesInput("");
+    setHandoverEvidenceFiles([]);
+
+    // Reset UAV states
+    setUAVCheckedItems({});
+    setUAVItemNotes({});
+    setUAVNotesInput("");
+
+    // Reset GPS states
+    setGpsCheckedItems({});
+    setGpsItemNotes({});
+    setGpsNotesInput("");
+
+    // Reset Payload states
+    setPayloadCheckedItems({});
+    setPayloadItemNotes({});
+    setPayloadNotesInput("");
+
+    // Reset Other Equipment states
+    setOtherCheckedItems({});
+    setOtherItemNotes({});
+    setOtherNotesInput("");
+
+    // Clear AsyncStorage
+    AsyncStorage.multiRemove([
+      "handoveroutCheckedItems",
+      "handoverinCheckedItems",
+      "handoverPIC",
+      "handoverNotesInput",
+      "handoverEvidenceFiles",
+      "uavCheckedItems",
+      "uavItemNotes",
+      "uavNotesInput",
+      "gpsCheckedItems",
+      "gpsItemNotes",
+      "gpsNotesInput",
+      "payloadCheckedItems",
+      "payloadItemNotes",
+      "payloadNotesInput",
+      "otherCheckedItems",
+      "otherItemNotes",
+      "otherNotesInput",
+    ]).catch((error) => {
+      console.log("Error clearing AsyncStorage:", error);
+    });
+
+    console.log("✅ All states have been reset");
+  };
 
   // Submit All
   const handleSubmitAll = async () => {
@@ -579,7 +725,7 @@ const HandoverPage = ({ navigation }) => {
       await handleSubmitOther();
       await handleSubmitHandover();
       resetChecklistState(); // dari useProject
-  
+
       console.log("🚀 resetChecklistState called after submit");
       Alert.alert("Success", "✅ All data submitted successfully!");
       navigation.navigate("ProjectList");
@@ -589,8 +735,8 @@ const HandoverPage = ({ navigation }) => {
     }
   };
 
-  const windowWidth = Dimensions.get('window').width;
-  const windowHeight = Dimensions.get('window').height;
+  const windowWidth = Dimensions.get("window").width;
+  const windowHeight = Dimensions.get("window").height;
 
   return (
     <ScrollView
@@ -648,42 +794,42 @@ const HandoverPage = ({ navigation }) => {
       </View>
 
       {/* Evidence Section */}
-<View style={styles.section}>
-  <Text style={styles.sectionTitle}>Evidence</Text>
-  {isUploading ? (
-    <View style={styles.uploadingContainer}>
-      <ActivityIndicator size="large" color="#00CFFF" />
-      <Text style={styles.uploadingText}>Uploading photos...</Text>
-    </View>
-  ) : (
-    <>
-      {handoverEvidenceFiles.length === 0 ? (
-        <TouchableOpacity
-          style={styles.submitButton}
-          onPress={handleSelectHandoverEvidence}
-        >
-          <Text style={styles.submitButtonText}>Upload Evidence</Text>
-        </TouchableOpacity>
-      ) : (
-        <FlatList
-          horizontal
-          data={handoverEvidenceFiles}
-          keyExtractor={(_, index) => index.toString()}
-          renderItem={renderEvidenceItem}
-          ListFooterComponent={
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={handleSelectHandoverEvidence}
-            >
-              <AntDesign name="plus" size={24} color="white" />
-            </TouchableOpacity>
-          }
-          contentContainerStyle={styles.evidenceList}
-        />
-      )}
-    </>
-  )}
-</View>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Evidence</Text>
+        {isUploading ? (
+          <View style={styles.uploadingContainer}>
+            <ActivityIndicator size="large" color="#00CFFF" />
+            <Text style={styles.uploadingText}>Uploading photos...</Text>
+          </View>
+        ) : (
+          <>
+            {handoverEvidenceFiles.length === 0 ? (
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleSelectHandoverEvidence}
+              >
+                <Text style={styles.submitButtonText}>Upload Evidence</Text>
+              </TouchableOpacity>
+            ) : (
+              <FlatList
+                horizontal
+                data={handoverEvidenceFiles}
+                keyExtractor={(_, index) => index.toString()}
+                renderItem={renderEvidenceItem}
+                ListFooterComponent={
+                  <TouchableOpacity
+                    style={styles.addButton}
+                    onPress={handleSelectHandoverEvidence}
+                  >
+                    <AntDesign name="plus" size={24} color="white" />
+                  </TouchableOpacity>
+                }
+                contentContainerStyle={styles.evidenceList}
+              />
+            )}
+          </>
+        )}
+      </View>
       <Modal
         visible={modalVisible}
         transparent={true}
@@ -833,21 +979,45 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     letterSpacing: 1,
   },
-  evidenceList: { alignItems: 'center' },
-  evidenceItem: { marginRight: 10, position: 'relative' },
+  evidenceList: { alignItems: "center" },
+  evidenceItem: { marginRight: 10, position: "relative" },
   evidenceImage: { width: 100, height: 100, borderRadius: 8 },
   addButton: {
-    width: 100, height: 100, borderRadius: 8, backgroundColor: "#00CFFF",
-    justifyContent: 'center', alignItems: 'center', marginLeft: 5,
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    backgroundColor: "#00CFFF",
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 5,
   },
   deleteButton: {
-    position: 'absolute', top: 5, right: 5, backgroundColor: 'rgba(255,0,0,0.7)',
-    borderRadius: 12, width: 24, height: 24, justifyContent: 'center', alignItems: 'center',
+    position: "absolute",
+    top: 5,
+    right: 5,
+    backgroundColor: "rgba(255,0,0,0.7)",
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  uploadingContainer: { height: 120, justifyContent: 'center', alignItems: 'center' },
-  uploadingText: { color: '#FFFFFF', marginTop: 10 },
-  modalContainer: { flex: 1, backgroundColor: 'rgba(0,0,0,0.9)', justifyContent: 'center', alignItems: 'center' },
-  zoomedImage: { width: Dimensions.get('window').width * 0.9, height: Dimensions.get('window').height * 0.8 },
+  uploadingContainer: {
+    height: 120,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  uploadingText: { color: "#FFFFFF", marginTop: 10 },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  zoomedImage: {
+    width: Dimensions.get("window").width * 0.9,
+    height: Dimensions.get("window").height * 0.8,
+  },
 });
 
 export default HandoverPage;
