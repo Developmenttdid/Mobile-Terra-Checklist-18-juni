@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "Terra Checklist",
+    "runtimeVersion": "1.0.0",
+    "slug": "skyops-mobile",
+    "description": "checklist app for drone management",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/negative_yoko_white.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/negative_yoko_white.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#040F2E"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.terracheck"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/negative_mark.png",
+        "backgroundColor": "#040F2E"
+      },
+      "package": "com.terracheck"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "77cc66ee-14d9-4d27-9fa6-717f4b70eff8"
+      }
+    },
+    "plugins": [
+      [
+        "expo-updates",
+        {
+          "username": "veranynunky"
+        }
+      ]
+    ],
+    "updates": {
+      "url": "https://u.expo.dev/77cc66ee-14d9-4d27-9fa6-717f4b70eff8"
+    },
+    "owner": "devtdid"
+  }
+}

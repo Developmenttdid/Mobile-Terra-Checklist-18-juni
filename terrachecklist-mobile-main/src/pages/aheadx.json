@@ -1,0 +1,80 @@
+[
+    {
+      "type": "LIST",
+      "title": "PROJECT ID",
+      "choices": [
+        "AIGC-SEC",
+        "IRAI-KARAWANG",
+        "RUI-CPI-GIS",
+        "PROJECT-DEMO"
+      ]
+    },
+    {
+      "type": "CHECKBOX_GRID",
+      "title": "UAV",
+      "rows": [
+        "FUSELAGE",
+        "V3 GIMBAL PROTECTIVE COVER",
+        "MIDDLE WING",
+        "RIGHT WING",
+        "LEFT WING",
+        "MIDDLE WING JOINER",
+        "TAILBOOM",
+        "REAR RIGHT WING",
+        "REAR LEFT WING",
+        "REAR WING JOINER",
+        "LAPTOP GCS",
+        "LAPTOP CHARGER",
+        "ANEMOMETER",
+        "MICRO SD CARD",
+        "AHEADX INTELLIGENT BATTERY-B254",
+        "IDS 2 MODULE",
+        "CABLE LAN",
+        "POWER BANK IDS",
+        "CABLE TYPE C",
+        "INTELLIGENT CHARGER-C-150Q",
+        "TYPE C HUB",
+        "ZIMI 65W POWER ADAPTER",
+        "BATTERY CABLE CHARGER",
+        "REMOTE CONTROL"
+      ],
+      "columns": [
+        "Check"
+      ]
+    },
+    {
+      "type": "CHECKBOX_GRID",
+      "title": "ANTENNA ATS",
+      "rows": [
+        "ANTENNA ATS + TRIPOD",
+        "ADAPTER DC",
+        "LEMO TO DC POWER SUPPLY CABLE",
+        "ATAS-IDS 2 CONNECTION CABLE",
+        "POWER BANK ATS ANTENNA",
+        "TRIPOD TOOL KIT"
+      ],
+      "columns": [
+        "Check"
+      ]
+    },
+    {
+      "type": "CHECKBOX_GRID",
+      "title": "OTHERS",
+      "rows": [
+        "COMPASSS",
+        "HAND GLOVES"
+      ],
+      "columns": [
+        "Check"
+      ]
+    },
+    {
+      "type": "PARAGRAPH_TEXT",
+      "title": "NOTES",
+      "paragraphText": ""
+    },
+    {
+      "type": "FILE_UPLOAD",
+      "title": "UPLOAD EVIDENCE"
+    }
+  ]
