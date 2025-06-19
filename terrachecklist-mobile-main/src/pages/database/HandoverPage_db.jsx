@@ -327,7 +327,7 @@ const HandoverPage_Db = ({ navigation }) => {
       }
   
       const result = await response.json();
-     // Alert.alert("Success", "Handover data saved successfully!");
+      Alert.alert("Success", "Handover data saved successfully!");
       fetchHandoverData(); // Refresh data
       return result; // Return the saved data
     } catch (error) {
@@ -353,30 +353,43 @@ const HandoverPage_Db = ({ navigation }) => {
     );
   }
 
-  const handleSaveAll = async () => {
-    try {
-      // Save all checklist items first
-      await Promise.all([
-        handleUavSave(),
-        handleGpsSave(),
-        handlePayloadSave(),
-        handlePpeSave(),
-        handleOtherSave()
-      ]);
-  
-      // Then save handover
-      await handleSaveHandover();
-  
-      Alert.alert("Success", "All data saved successfully");
-      navigation.navigate("ProjectList");
-    } catch (error) {
-      console.error("Save error:", error);
-      Alert.alert(
-        "Error", 
-        error.message || "Failed to save data. Error: " + error.toString()
-      );
+const handleSaveAll = async () => {
+  try {
+    // Simpan semua checklist
+    const results = await Promise.allSettled([
+      handleUavSave().catch(e => {
+        console.error('UAV save failed:', e);
+        throw new Error(`UAV: ${e.message}`);
+      }),
+      handleGpsSave(),
+      handlePayloadSave(),
+      handlePpeSave(),
+      handleOtherSave()
+    ]);
+
+    // Cek jika ada yang gagal
+    const failedSaves = results.filter(r => r.status === 'rejected');
+    if (failedSaves.length > 0) {
+      const uavError = failedSaves.find(f => f.reason.message.includes('UAV'));
+      if (uavError) {
+        throw new Error(`Failed to save UAV data: ${uavError.reason.message}`);
+      }
+      throw new Error(`Some data failed to save. Check logs for details.`);
     }
-  };
+
+    // Simpan handover
+    await handleSaveHandover();
+    
+    Alert.alert("Success", "All data saved successfully");
+    navigation.navigate("ProjectList");
+  } catch (error) {
+    console.error("Save all error:", error);
+    Alert.alert(
+      "Error", 
+      error.message || "Failed to save data. Please try again."
+    );
+  }
+};
 
   const saveAllInCheckbox = async () => {
     try {
